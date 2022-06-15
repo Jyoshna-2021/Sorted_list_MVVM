@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">sorted_list_view</string>
+    <string name="add_values">ADD Values</string>
+    <string name="add_elements_to_the_list">Add elements to the list</string>
+    <string name="add">Add</string>
+    <string name="hint">hint</string>
+    <string name="android">android</string>
+</resources>
