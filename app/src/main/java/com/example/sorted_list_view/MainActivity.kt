@@ -29,29 +29,32 @@ class MainActivity : AppCompatActivity() {
         val decorator = DividerItemDecoration(applicationContext, LinearLayoutManager.VERTICAL)
         decorator.setDrawable(ContextCompat.getDrawable(applicationContext, R.drawable.divider)!!)
         recyclerView.addItemDecoration(decorator)
-        binding.button2.setOnClickListener {
-            if (binding.textET.text!!.isEmpty()) {
+     val adapter = NotesAdapter()
+
+     recyclerView.adapter = adapter
+     mainViewModel.getNotes().observe(this) { adapter.differ.submitList(it) }
+
+     binding.button2.setOnClickListener {
+         val list = ArrayList<Notes>(placelist)
+         if (binding.textET.text!!.isEmpty()) {
                 binding.textET.error = "Empty"
             } else {
                 mainViewModel.insertNotes(Notes(0, binding.textET.text.toString()))
                 Toast.makeText(this, "DONE", Toast.LENGTH_SHORT).show()
                 binding.textET.text = null
             }
-        }
-        val adapter = NotesAdapter()
-//    val list= listOf<Notes>()
-//    val placelist= list.sortedBy {it.title } as ArrayList<Notes>
-        recyclerView.adapter = adapter
-        mainViewModel.getNotes().observe(this) { adapter.differ.submitList(it) }
-        val sectionItemDecoration = ItemsDecoration(
-            this,
-            resources.getDimensionPixelSize(R.dimen.recycler_section_header_height),
-            true,
-            getSectionCallback(placelist)
-        )
-        recyclerView.addItemDecoration(sectionItemDecoration)
 
-        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+         list.sortBy { it.title.uppercase() }
+         mainViewModel.getNotes().observe(this) { adapter.differ.submitList(list) }
+         placelist = list
+         val sectionItemDecoration = ItemsDecoration(
+             this, 40, true,
+             getSectionCallback()
+         )
+         recyclerView.addItemDecoration(sectionItemDecoration)
+
+    }
+     val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
             ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
         ) {
@@ -76,13 +79,13 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-    private fun getSectionCallback(people: List<Notes>): ItemsDecoration.SectionCallback {
+    private fun getSectionCallback(): ItemsDecoration.SectionCallback {
         return object : ItemsDecoration.SectionCallback {
             override fun isSection(pos: Int): Boolean {
-                return (pos == 0||people[pos].title[0]!=people[pos-1].title[0])
+                return (pos == 0||placelist[pos].title[0]!=placelist[pos-1].title[0])
             }
             override fun getSectionHeaderName(pos: Int): String {
-                return people[pos].title.subSequence(0,1) as String
+                return placelist[pos].title.subSequence(0,1) as String
             }
 
         }
