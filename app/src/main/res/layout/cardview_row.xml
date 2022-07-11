@@ -11,5 +11,5 @@
         android:layout_height="wrap_content"
         android:text="@string/android"
         android:padding="8dp"
-        android:textSize="24sp"/>
+        android:textSize="24sp" />
 </androidx.cardview.widget.CardView>
