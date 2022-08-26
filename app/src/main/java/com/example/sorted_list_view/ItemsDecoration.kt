@@ -11,14 +11,14 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 
 class ItemsDecoration(
-    var context: Context,
-    var headerOffset: Int,
-    var sticky: Boolean,
-    var sectionCallback: SectionCallback
+    private var context: Context,
+    private var headerOffset: Int,
+    private var sticky: Boolean,
+    private var sectionCallback: SectionCallback
 ) :
     ItemDecoration() {
-    var headerView: View? = null
-    var tvTitle: TextView? = null
+    private var headerView: View? = null
+    private var tvTitle: TextView? = null
     override fun getItemOffsets(
         outRect: Rect,
         view: View,
@@ -26,8 +26,9 @@ class ItemsDecoration(
         state: RecyclerView.State
     ) {
         super.getItemOffsets(outRect, view, parent, state)
+        val data=(parent.adapter as NotesAdapter).differ.currentList
         val pos = parent.getChildAdapterPosition(view)
-        if (sectionCallback.isSection(pos)) {
+        if (sectionCallback.isSection(data,pos)) {
             outRect.top = headerOffset
         }
     }
@@ -40,26 +41,29 @@ class ItemsDecoration(
             fixLayoutSize(headerView, parent)
         }
         var prevTitle = ""
+        val data=(parent.adapter as NotesAdapter).differ.currentList
         for (i in 0 until parent.childCount) {
             val child = parent.getChildAt(i)
             val childPos = parent.getChildAdapterPosition(child)
-            val title = sectionCallback.getSectionHeaderName(childPos)
+            val title = sectionCallback.getSectionHeaderName(data,childPos)
             tvTitle!!.text = title
             if (!prevTitle.equals(
                     title,
                     ignoreCase = true
-                ) || sectionCallback.isSection(childPos)
+                ) || sectionCallback.isSection(data, childPos)
             ) {
                 drawHeader(c, child, headerView)
                 prevTitle = title
             }
+
+
         }
     }
 
     private fun drawHeader(c: Canvas, child: View, headerView: View?) {
         c.save()
         if (sticky) {
-            c.translate(0f, Math.max(0, child.top - headerView!!.height).toFloat())
+            c.translate(0f, 0.coerceAtLeast(child.top - headerView!!.height).toFloat())
         } else {
             c.translate(0f, (child.top - headerView!!.height).toFloat())
         }
@@ -67,7 +71,7 @@ class ItemsDecoration(
         c.restore()
     }
 
-    fun fixLayoutSize(view: View?, viewGroup: ViewGroup) {
+    private fun fixLayoutSize(view: View?, viewGroup: ViewGroup) {
         val widthSpec = View.MeasureSpec.makeMeasureSpec(viewGroup.width, View.MeasureSpec.EXACTLY)
         val heightSpec =
             View.MeasureSpec.makeMeasureSpec(viewGroup.height, View.MeasureSpec.UNSPECIFIED)
@@ -91,7 +95,7 @@ class ItemsDecoration(
     }
 
     interface SectionCallback {
-        fun isSection(pos: Int): Boolean
-        fun getSectionHeaderName(pos: Int): String
+        fun isSection(data: MutableList<Notes>, pos: Int): Boolean
+        fun getSectionHeaderName(data: MutableList<Notes>, pos: Int): String
     }
 }

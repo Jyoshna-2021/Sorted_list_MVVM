@@ -1,23 +1,23 @@
 package com.example.sorted_list_view
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sorted_list_view.databinding.ActivityMainBinding
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.constraintlayout.helper.widget.MotionEffect.TAG
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var binding: ActivityMainBinding
-    private var placelist= arrayListOf<Notes>()
+    val adapter = NotesAdapter()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -39,19 +39,15 @@ class MainActivity : AppCompatActivity() {
                 binding.textET.text = null
             }
         }
-        val adapter = NotesAdapter()
-//    val list= listOf<Notes>()
-//    val placelist= list.sortedBy {it.title } as ArrayList<Notes>
         recyclerView.adapter = adapter
         mainViewModel.getNotes().observe(this) { adapter.differ.submitList(it) }
         val sectionItemDecoration = ItemsDecoration(
             this,
             resources.getDimensionPixelSize(R.dimen.recycler_section_header_height),
             true,
-            getSectionCallback(placelist)
+            getSectionCallback()
         )
         recyclerView.addItemDecoration(sectionItemDecoration)
-
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
             ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
@@ -67,30 +63,27 @@ class MainActivity : AppCompatActivity() {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val pos = viewHolder.bindingAdapterPosition
                 val notes = adapter.differ.currentList[pos]
-
                 mainViewModel.deleteNode(notes)
             }
         }
 
         ItemTouchHelper(itemTouchHelperCallback).apply {
-            attachToRecyclerView(binding.recyclerView)
-        }
+            attachToRecyclerView(binding.recyclerView) }
 
     }
-    private fun getSectionCallback(people: List<Notes>): ItemsDecoration.SectionCallback {
+    private fun getSectionCallback(): ItemsDecoration.SectionCallback {
         return object : ItemsDecoration.SectionCallback {
-            override fun isSection(pos: Int): Boolean {
-                return (pos == 0||people[pos].title[0]!=people[pos-1].title[0])
+            override fun isSection(data: MutableList<Notes>, pos: Int): Boolean {
+                return (pos == 0||data[pos].title[0]!=data[pos-1].title[0])
             }
-            override fun getSectionHeaderName(pos: Int): String {
-                return people[pos].title.subSequence(0,1) as String
+            override fun getSectionHeaderName(data: MutableList<Notes>, pos: Int): String {
+                return data[pos].title.subSequence(0,1) as String
             }
-
         }
     }
-
 
 }
+
 
 
 
