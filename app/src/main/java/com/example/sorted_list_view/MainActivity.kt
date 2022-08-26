@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity() {
             getSectionCallback()
         )
         recyclerView.addItemDecoration(sectionItemDecoration)
+        //Swipe to delete
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
             ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
